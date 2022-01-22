@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventario</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+
+</head>
+<body>
+
+    
+    <div class="container my-5">
+
+        <h1 class="mb-3">Monitor de Inventario</h1>
+
+        <div class="row">
+            <div class="col">
+                <select class="form-select" aria-label="Default select example" id="storeSelect">
+                    <option selected>Tienda</option>
+                </select>
+            </div>
+            <div class="col">
+                <select class="form-select" aria-label="Default select example" id="categoriesSelect">
+                    <option selected>Categoria</option>
+                </select>
+            </div>
+            <div class="col">
+                <select class="form-select" aria-label="Default select example" id="brandSelect">
+                    <option selected>Marca</option>
+                </select>
+            </div>
+            <div class="col">
+                <button type="button" class="btn btn-info" onclick="getData()">Buscar</button>
+            </div>
+        </div>
+    </div> 
+
+    <div class="container">
+        <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Tienda</th>
+                <th scope="col">ID Producto</th>
+                <th scope="col">Nombre Producto</th>
+                <th scope="col">Inventario</th>
+                <th scope="col">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="cuerpo">
+            </tbody>
+          </table>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+</body>
+</html>
+
+<script>
+    let url = "http://localhost:3000/inventario";
+    let tbody = document.getElementById("cuerpo");
+  
+    let inventario = [];
+    window.onload = getSelects();
+
+    async function getSelects(){
+        await axios.get("http://localhost:3000/stores").then((data) => {
+            let stores = data.data;
+            console.log(stores);
+            let storeSelect = document.getElementById("storeSelect");
+            stores.forEach((s, i) => {
+                var opt = document.createElement('option');
+                opt.value = s.store_name;
+                opt.innerHTML = s.store_name;
+                storeSelect.appendChild(opt);
+            });
+        });
+
+        await axios.get("http://localhost:3000/categories").then((data) => {
+            let categories = data.data;
+            console.log(categories);
+            let categoriesSelect = document.getElementById("categoriesSelect");
+            categories.forEach((c, i) => {
+                var opt = document.createElement('option');
+                opt.value = c.category_name;
+                opt.innerHTML = c.category_name;
+                categoriesSelect.appendChild(opt);
+            });
+        });
+
+        await axios.get("http://localhost:3000/brands").then((data) => {
+            let brands = data.data;
+            console.log(brands);
+            let brandSelect = document.getElementById("brandSelect");
+            brands.forEach((b, i) => {
+                var opt = document.createElement('option');
+                opt.value = b.brand_name;
+                opt.innerHTML = b.brand_name;
+                brandSelect.appendChild(opt);
+            });
+        });
+    }
+  
+    async function getData() {
+
+    let store = document.getElementById("storeSelect").value == "Tienda" ? null : document.getElementById("storeSelect").value;
+    let categorie = document.getElementById("categoriesSelect").value == "Categoria" ? null : document.getElementById("categoriesSelect").value;
+    let brand = document.getElementById("brandSelect").value == "Marca" ? null : document.getElementById("brandSelect").value;
+
+      await axios.get(url + `/?store=${store}&categorie=${categorie}&brand=${brand}`).then((data) => {
+        inventario = data.data;
+        console.log(inventario);
+        tbody.innerHTML = "";
+        inventario.forEach((c, i) => {
+          tbody.innerHTML += `
+          <tr>
+            <td>${c.store_name}</td>
+            <td>${c.product_id}</td>
+            <td>${c.product_name}</td>
+            <td>${c.quantity}</td>
+            <td>
+              <button class="btn btn-warning">Ver</button>
+            </td>
+          </tr>`;
+        });
+      });}
+
+      /*onclick="prepararCurso(${i},'${c.id}')"*/
+  </script>
